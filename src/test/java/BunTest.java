@@ -1,48 +1,37 @@
-import org.junit.Before;
+import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import praktikum.Bun;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-
-
+@RunWith(Parameterized.class)
 public class BunTest {
-    private Bun bun;
+    private final String name;
+    private final float price;
+    private final static double DELTA = 0.01;
 
-    @Before
-    public void setUp() {
-        bun = new Bun("С кунжутом", 10);
+    public BunTest(String name, float price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    @Parameterized.Parameters
+    public static Object[][] params() {
+        return new Object[][]{
+                {"СмолТести", 111.2},
+                {"МедиумТести", 123.0}
+        };
     }
 
     @Test
-    public void checkCompositionTest() {
-        String expected = "С кунжутом";
-        String actual = bun.getName();
-
-        assertEquals("Проверим что булочка с кунжутом", expected, actual);
+    public void getNameTest() {
+        Bun bun = new Bun(name, price);
+        Assert.assertEquals(name, bun.getName());
     }
 
     @Test
-    public void checkWrongCompositionTest() {
-        String expected = "С кокосом";
-        String actual = bun.getName();
-
-        assertNotEquals("Проверим что булочка не с кокосом", expected, actual);
-    }
-
-    @Test
-    public void checkPriceTest() {
-        int expected = 10;
-        int actual = bun.getPrice();
-
-        assertEquals("Проверим корректную цену", expected, actual);
-    }
-
-    @Test
-    public void checkWrongPriceTest() {
-        int expected = 15;
-        int actual = bun.getPrice();
-
-        assertNotEquals("Проверим некорректную цену", expected, actual);
+    public void getPriceTest() {
+        Bun bun = new Bun(name, price);
+        Assert.assertEquals(price, bun.getPrice(), DELTA);
     }
 }

@@ -1,4 +1,4 @@
-import org.junit.Before;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -9,80 +9,87 @@ import praktikum.Burger;
 import praktikum.Ingredient;
 import praktikum.IngredientType;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BurgerTest {
-    private Ingredient ingredient;
-    private Burger burger;
+    private final static double DELTA = 0.01;
+
     @Mock
     private Bun bun;
+    @Mock
+    private Ingredient ingredient;
 
-    @Before
-    public void setUp() {
-        burger = new Burger();
-
+    @Test
+    public void setBunsTest() {
+        Burger burger = new Burger();
         burger.setBuns(bun);
+        Assert.assertEquals(bun, burger.bun);
+    }
 
-        ingredient = new Ingredient(IngredientType.начинка, "Хорошо", 5);
+    @Test
+    public void addIngredientTest() {
+        Burger burger = new Burger();
+        List<Ingredient> ingredients = new ArrayList<>();
+        ingredients.add(ingredient);
         burger.addIngredient(ingredient);
+        Assert.assertEquals(ingredients, burger.ingredients);
     }
 
     @Test
-    public void correctBunsTest() {
-        Mockito.when(burger.bun.getName()).thenReturn("Хорошо");
-        assertEquals("Элемент добавлен", "Хорошо", burger.bun.getName());
-    }
-
-    @Test
-    public void incorrectBunsTest() {
-        Mockito.when(burger.bun.getName()).thenReturn("Плохо");
-        assertEquals("Элемент не добавлен", "Плохо", burger.bun.getName());
-    }
-
-    @Test
-    public void incorrectIngredientTest() {
-        assertFalse("Элемент не добавлен", burger.ingredients.isEmpty());
-    }
-
-    @Test
-    public void incorrectRemoveIngredient() {
+    public void removeIngredientTest() {
+        Burger burger = new Burger();
+        List<Ingredient> ingredients = new ArrayList<>();
+        burger.addIngredient(ingredient);
         burger.removeIngredient(0);
-
-        assertTrue("Элемент не удален", burger.ingredients.isEmpty());
+        Assert.assertEquals(ingredients, burger.ingredients);
     }
 
     @Test
-    public void correctMoveIngredientTest() {
-        ingredient = new Ingredient(IngredientType.начинка, "Хорошо", 5);
-        burger.addIngredient(ingredient);
+    public void moveIngredientTest() {
+        Burger burger = new Burger();
+        Ingredient ingredient0 = new Ingredient(IngredientType.SAUCE, "Лук", (float) 20.0);
+        Ingredient ingredient1 = new Ingredient(IngredientType.FILLING, "Помидор", (float) 50.0);
+        List<Ingredient> ingredients = new ArrayList<>();
+        ingredients.add(ingredient1);
+        ingredients.add(ingredient0);
+        burger.addIngredient(ingredient0);
+        burger.addIngredient(ingredient1);
         burger.moveIngredient(0, 1);
-        assertEquals("Элемент перемещен", "Хорошо", burger.ingredients.get(0).name);
+        Assert.assertEquals(ingredients, burger.ingredients);
     }
 
     @Test
-    public void incorrectMoveIngredientTest() {
-        ingredient = new Ingredient(IngredientType.соус, "Плохо", 10);
+    public void getPriceTest() {
+        Burger burger = new Burger();
+        Mockito.when(bun.getPrice()).thenReturn((float) 111.2);
+        burger.setBuns(bun);
+        Mockito.when(ingredient.getPrice()).thenReturn((float) 20.0);
         burger.addIngredient(ingredient);
-        burger.moveIngredient(0, 1);
-        assertEquals("Элемент не перемещен", "Плохо", burger.ingredients.get(0).name);
+        Assert.assertEquals((float) 242.4, burger.getPrice(), DELTA);
     }
 
     @Test
-    public void getReceipt() {
-        Mockito.when(burger.bun.getName()).thenReturn("булочка");
-
-        StringBuilder receipt = new StringBuilder(String.format("(%s)%n", burger.bun.getName()));
-
-        for (Ingredient ingredient : burger.ingredients) {
-            receipt.append(String.format("= %s %s =%n", ingredient.getType().toString().toLowerCase(),
-                    ingredient.getName()));
+    public void getReceiptTest() {
+        Burger burger = new Burger();
+        Mockito.when(bun.getPrice()).thenReturn((float) 111.2);
+        Mockito.when(bun.getName()).thenReturn("СмолТести");
+        burger.setBuns(bun);
+        Mockito.when(ingredient.getPrice()).thenReturn((float) 20.0);
+        Mockito.when(ingredient.getName()).thenReturn("Лук");
+        Mockito.when(ingredient.getType()).thenReturn(IngredientType.SAUCE);
+        List<Ingredient> ingredients = new ArrayList<>();
+        ingredients.add(ingredient);
+        burger.addIngredient(ingredient);
+        StringBuilder receipt = new StringBuilder(String.format("(==== %s ====)%n", bun.getName()));
+        for (Ingredient i : ingredients) {
+            receipt.append(String.format("= %s %s =%n", i.getType().toString().toLowerCase(),
+                    i.getName()));
         }
-
-        receipt.append(String.format("(%s)%n", burger.bun.getName()));
-        Mockito.when(burger.bun.getPrice()).thenReturn(50);
-        receipt.append(String.format("%nЦена: %f%n", burger.getPrice()));
-
-        assertEquals(burger.getReceipt(), receipt.toString());
+        receipt.append(String.format("(==== %s ====)%n", bun.getName()));
+        receipt.append(String.format("%nPrice: %f%n", (float) 242.4));
+        Assert.assertEquals(receipt.toString(), burger.getReceipt());
     }
+
 }
