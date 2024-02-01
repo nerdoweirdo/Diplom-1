@@ -18,8 +18,8 @@ public class BunTest {
     @Parameterized.Parameters
     public static Object[][] params() {
         return new Object[][]{
-                {"СмолТести", 111.2},
-                {"МедиумТести", 123.0}
+                {"СмолТести", 111.2f},
+                {"МедиумТести", 123.0f}
         };
     }
 
